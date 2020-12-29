@@ -37,6 +37,7 @@ class RequestBasketsConsumerApi {
     }
 }
 
+// Invoke RequestBasket API for each upload with ClientAddress
 upload {
     beforeUploadRequest { request, repoPath ->
         RequestBasketsConsumerApi requestBasketsConsumerApi = new RequestBasketsConsumerApi();
@@ -44,5 +45,16 @@ upload {
         log.debug "RequestBaskets URL: " + requestBasketsConsumerApi.url
         String code = requestBasketsConsumerApi.invoke(request.getClientAddress());
         log.debug "RequestBaskets Code: " + code
+    }
+}
+
+// Tag the artifact as "RequestBasket" == true
+storage {
+    afterCreate { item ->
+        if (!item.isFolder()) {
+            def fstream = repositories.getContent(item.repoPath).inputStream
+            // read fstream and generate properties
+            repositories.setProperty(item.repoPath, "isRequestBasket", "true")
+        }
     }
 }
